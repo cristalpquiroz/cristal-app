@@ -1,4 +1,37 @@
 <?php
+include("conexion.php");
+?>
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Limones Piñateros</title>
+    <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+
+<header>
+    <h1> Limones Piñateros</h1>
+    <p>Sistema de Gestión de Pedidos</p>
+</header>
+
+<section class="contenedor">
+
+<h2>Registrar Cliente</h2>
+<form method="POST">
+    <input type="text" name="nombre" placeholder="Nombre del Cliente" required>
+    <input type="text" name="telefono" placeholder="Teléfono" required>
+    <input type="email" name="email" placeholder="Correo" required>
+    <input type="text" name="direccion" placeholder="Dirección" required>
+    <button type="submit" name="registrar">Registrar</button>
+</form>
+
+</section>
+
+</body>
+</html>
+<?php
 /**
  * Clase Cliente
  * Representa un cliente de la tienda
@@ -111,23 +144,6 @@ class Pedido {
         echo "<strong>Total: $$this->total</strong><br><hr>";
     }
 }
-// Crear cliente
-$cliente1 = new Cliente(1, "María López", "555-1234", "maria@email.com", "Ciudad de México");
-
-// Crear piñatas
-$pinata1 = new Pinata(1, "Piñata Spiderman", 350, 10);
-$pinata2 = new Pinata(2, "Piñata Frozen", 400, 5);
-
-// Crear detalles
-$detalle1 = new DetallePedido(1, $pinata1, 2);
-$detalle2 = new DetallePedido(2, $pinata2, 1);
-
-// Crear pedido
-$pedido1 = new Pedido(1, $cliente1, "2026-02-20", "2026-02-25");
-
-// Agregar detalles al pedido
-$pedido1->agregarDetalle($detalle1);
-$pedido1->agregarDetalle($detalle2);
 
 // Mostrar pedido
 $pedido1->mostrarPedido();
