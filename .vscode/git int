@@ -1,0 +1,21 @@
+git remote add origin https://github.com/cristalpquiroz/cristal-app.git
+git branch -M main
+git push -u origin main
+git commit-m "Actualiza"
+git push - u 
+git branch 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
