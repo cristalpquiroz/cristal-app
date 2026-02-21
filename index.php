@@ -1,9 +1,49 @@
 <?php
-include("conexion.php");
+require_once("conexion.php");
+require_once("clases.php");
+
+$mensaje = "";
+
+/* REGISTRAR CLIENTE */
+if(isset($_POST['registrar'])){
+
+    $cliente = new Cliente(
+        $_POST['nombre'],
+        $_POST['telefono'],
+        $_POST['email'],
+        $_POST['direccion']
+    );
+
+    $id_cliente = $cliente->guardar($conn);
+    $mensaje = "Cliente guardado con ID: " . $id_cliente;
+}
+
+/* REGISTRAR PEDIDO */
+if(isset($_POST['pedido'])){
+
+    $id_cliente = 1;  // temporal
+
+    $id_pinata = $_POST['producto'];
+    $cantidad = $_POST['cantidad'];
+
+    $consulta = $conn->query("SELECT precio FROM pinata WHERE id_pinata = $id_pinata");
+    $fila = $consulta->fetch_assoc();
+    $precio = $fila['precio'];
+
+    $pedido = new Pedido($id_cliente);
+    $total = $pedido->calcularTotal($precio, $cantidad);
+
+    $id_pedido = $pedido->guardar($conn);
+
+    $conn->query("INSERT INTO detalle_pedido (id_pedido, id_pinata, cantidad, subtotal)
+                  VALUES ('$id_pedido', '$id_pinata', '$cantidad', '$total')");
+
+    $mensaje = "Pedido registrado. Total: $" . $total;
+}
 ?>
 
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
     <meta charset="UTF-8">
     <title>Limones Piñateros</title>
@@ -11,141 +51,43 @@ include("conexion.php");
 </head>
 <body>
 
-<header>
-    <h1> Limones Piñateros</h1>
-    <p>Sistema de Gestión de Pedidos</p>
-</header>
+<h1> Limones Piñateros</h1>
 
-<section class="contenedor">
+<?php
+if($mensaje != ""){
+    echo "<p><strong>$mensaje</strong></p>";
+}
+?>
 
 <h2>Registrar Cliente</h2>
 <form method="POST">
-    <input type="text" name="nombre" placeholder="Nombre del Cliente" required>
+    <input type="text" name="nombre" placeholder="Nombre" required>
     <input type="text" name="telefono" placeholder="Teléfono" required>
     <input type="email" name="email" placeholder="Correo" required>
     <input type="text" name="direccion" placeholder="Dirección" required>
     <button type="submit" name="registrar">Registrar</button>
 </form>
 
-</section>
+<hr>
+
+<h2>Registrar Pedido</h2>
+<form method="POST">
+
+<select name="producto">
+<?php
+$resultado = $conn->query("SELECT * FROM pinata");
+while($fila = $resultado->fetch_assoc()){
+    echo "<option value='".$fila['id_pinata']."'>
+            ".$fila['nombre']." - $".$fila['precio']."
+          </option>";
+}
+?>
+</select>
+
+<input type="number" name="cantidad" placeholder="Cantidad" required>
+<button type="submit" name="pedido">Guardar Pedido</button>
+
+</form>
 
 </body>
 </html>
-<?php
-/**
- * Clase Cliente
- * Representa un cliente de la tienda
- */
-class Cliente {
-
-    // Atributos
-    private $id_cliente;
-    private $nombre;
-    private $telefono;
-    private $email;
-    private $direccion;
-
-    // Constructor
-    public function __construct($id_cliente, $nombre, $telefono, $email, $direccion) {
-        $this->id_cliente = $id_cliente;
-        $this->nombre = $nombre;
-        $this->telefono = $telefono;
-        $this->email = $email;
-        $this->direccion = $direccion;
-    }
-
-    // Método para mostrar información
-    public function mostrarCliente() {
-        echo "Cliente: $this->nombre <br>";
-        echo "Teléfono: $this->telefono <br>";
-        echo "Email: $this->email <br>";
-        echo "Dirección: $this->direccion <br><hr>";
-    }
-}
-class Pinata {
-
-    private $id_pinata;
-    private $nombre;
-    private $precio;
-    private $stock;
-
-    public function __construct($id_pinata, $nombre, $precio, $stock) {
-        $this->id_pinata = $id_pinata;
-        $this->nombre = $nombre;
-        $this->precio = $precio;
-        $this->stock = $stock;
-    }
-
-    public function mostrarPinata() {
-        echo "Piñata: $this->nombre <br>";
-        echo "Precio: $$this->precio <br>";
-        echo "Stock: $this->stock <br><hr>";
-    }
-
-    public function getPrecio() {
-        return $this->precio;
-    }
-}
- class DetallePedido {
-
-    private $id_detalle;
-    private $pinata;
-    private $cantidad;
-    private $subtotal;
-
-    public function __construct($id_detalle, $pinata, $cantidad) {
-        $this->id_detalle = $id_detalle;
-        $this->pinata = $pinata;
-        $this->cantidad = $cantidad;
-        $this->subtotal = $pinata->getPrecio() * $cantidad;
-    }
-
-    public function mostrarDetalle() {
-        echo "Cantidad: $this->cantidad <br>";
-        echo "Subtotal: $$this->subtotal <br><hr>";
-    }
-
-    public function getSubtotal() {
-        return $this->subtotal;
-    }
-}
-class Pedido {
-
-    private $id_pedido;
-    private $cliente;
-    private $fecha_pedido;
-    private $fecha_entrega;
-    private $detalles = [];
-    private $total = 0;
-
-    public function __construct($id_pedido, $cliente, $fecha_pedido, $fecha_entrega) {
-        $this->id_pedido = $id_pedido;
-        $this->cliente = $cliente;
-        $this->fecha_pedido = $fecha_pedido;
-        $this->fecha_entrega = $fecha_entrega;
-    }
-
-    public function agregarDetalle($detalle) {
-        $this->detalles[] = $detalle;
-        $this->total += $detalle->getSubtotal();
-    }
-
-    public function mostrarPedido() {
-        echo "<h3>Pedido #$this->id_pedido</h3>";
-        $this->cliente->mostrarCliente();
-        echo "Fecha Pedido: $this->fecha_pedido <br>";
-        echo "Fecha Entrega: $this->fecha_entrega <br>";
-        echo "<h4>Detalles:</h4>";
-
-        foreach ($this->detalles as $detalle) {
-            $detalle->mostrarDetalle();
-        }
-
-        echo "<strong>Total: $$this->total</strong><br><hr>";
-    }
-}
-
-// Mostrar pedido
-$pedido1->mostrarPedido();
-
-?>

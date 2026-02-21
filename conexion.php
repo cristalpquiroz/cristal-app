@@ -1,11 +1,14 @@
 <?php
-include("conexion.php");
-echo "Conexión exitosa";
-?>
 
->?php
-$conexion=mysqli_connect("localhost","root","","limones_db");
-if($conexion->connect_error){
-    die("Error de conexión: " . $conexion->connect_error);
+$host = "localhost";
+$usuario = "root";
+$password = "";
+$bd = "limones_db";
+
+$conn = new mysqli($host, $usuario, $password, $bd);
+
+if ($conn->connect_error) {
+    die("Error de conexión: " . $conn->connect_error);
 }
-?
+
+?>
