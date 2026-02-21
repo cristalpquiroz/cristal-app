@@ -1,6 +1,6 @@
 body {
     font-family: Arial;
-    background: #f4f4f4;
+    background: #5e8692;
     margin: 0;
 }
 
@@ -33,7 +33,7 @@ button {
 }
 
 .resultado {
-    background: #e9f1ff;
+    background: #39588d;
     padding: 10px;
     margin-bottom: 15px;
 }
